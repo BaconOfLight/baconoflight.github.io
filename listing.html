@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5x5 Image Grid</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            max-width: 800px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .grid-item {
+            text-align: center;
+        }
+        .grid-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .grid-item p {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <script>
+            const folderPath = "images/"; // Change this to your actual folder path
+            const totalImages = 25; // Number of images
+            let availableImages = 0;
+
+            for (let i = 1; i <= totalImages; i++) {
+                let img = new Image();
+                img.src = `${folderPath}image${i}.jpg`;
+                img.onerror = () => console.warn(`Missing image: image${i}.jpg`);
+                img.onload = () => {
+                    availableImages++;
+                    document.write(`
+                        <div class="grid-item">
+                            <img src="${folderPath}image${i}.jpg" alt="Thumbnail ${i}">
+                            <p>Description ${i}</p>
+                        </div>
+                    `);
+                };
+            }
+
+            setTimeout(() => {
+                if (availableImages < totalImages) {
+                    console.warn(`Only ${availableImages} images were loaded.`);
+                }
+            }, 3000);
+        </script>
+    </div>
+</body>
+</html>
