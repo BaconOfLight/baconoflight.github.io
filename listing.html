@@ -32,6 +32,7 @@
             object-fit: cover;
             border-radius: 5px;
             border: 1px solid #ddd;
+            cursor: pointer;
         }
         .grid-item p {
             margin-top: 5px;
@@ -49,6 +50,10 @@
             const totalImages = 25;
             const gridContainer = document.getElementById("grid-container");
 
+            function openImageInNewWindow(imageSrc) {
+                window.open(imageSrc, "_blank");
+            }
+
             // Fetch descriptions from JSON file
             fetch("descriptions.json")
                 .then(response => response.json())
@@ -61,6 +66,9 @@
                         let imageName = `image${i}.jpg`;
                         img.src = `${folderPath}${imageName}`;
                         img.alt = `Thumbnail ${i}`;
+                        img.onclick = function () {
+                            openImageInNewWindow(this.src);
+                        };
                         img.onload = () => console.log(`Loaded: ${imageName}`);
                         img.onerror = function () {
                             this.src = "images/brokenimg.jpg";
