@@ -57,7 +57,7 @@
                 img.alt = `Thumbnail ${i}`;
                 img.onload = () => console.log(`Loaded: image${i}.jpg`);
                 img.onerror = function () {
-                    this.src = "https://via.placeholder.com/100";
+                    this.src = "images/brokenimg.jpg";
                     console.warn(`Missing image: image${i}.jpg`);
                 };
 
