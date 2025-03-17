@@ -80,7 +80,11 @@
 
             // Fetch descriptions from JSON file
             fetch("descriptions.json")
-                .then(response => response.json())
+                .then(response => response.text())  // Get raw text response
+                .then(text => {
+                    logToFooter(`Raw JSON response: ${text}`);  // Debugging output
+                    return JSON.parse(text);  // Parse JSON manually
+                })
                 .then(descriptions => {
                     for (let i = 1; i <= totalImages; i++) {
                         let gridItem = document.createElement("div");
