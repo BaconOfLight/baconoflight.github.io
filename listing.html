@@ -116,5 +116,66 @@
                 .catch(error => console.error("Error loading descriptions:", error));
         });
     </script>
+    <footer style="margin-top: 20px; width: 100%; text-align: center; padding: 10px; background: #ddd;">
+        <p id="console-output" style="font-size: 12px; white-space: pre-wrap;">Console Output:</p>
+    </footer>
+    <script>
+        function logToFooter(message) {
+            const footer = document.getElementById("console-output");
+            footer.textContent += `
+${message}`;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            logToFooter("DOM Loaded, starting image load...");
+            const folderPath = "images/";
+            const totalImages = 25;
+            const gridContainer = document.getElementById("grid-container");
+
+            function openImageInNewWindow(imageSrc) {
+                window.open(imageSrc, "_blank");
+            }
+
+            fetch("descriptions.json")
+                .then(response => response.json())
+                .then(descriptions => {
+                    logToFooter("Descriptions loaded successfully.");
+                    for (let i = 1; i <= totalImages; i++) {
+                        let gridItem = document.createElement("div");
+                        gridItem.className = "grid-item";
+
+                        let img = document.createElement("img");
+                        let imageName = `image${i}.jpg`;
+                        img.src = `${folderPath}${imageName}`;
+                        img.alt = `Thumbnail ${i}`;
+                        img.onclick = function () {
+                            openImageInNewWindow(this.src);
+                        };
+                        img.onload = () => logToFooter(`Loaded: ${imageName}`);
+                        img.onerror = function () {
+                            this.src = "images/brokenimg.jpg";
+                            logToFooter(`Missing image: ${imageName}`);
+                        };
+
+                        let desc = document.createElement("p");
+                        desc.classList.add("description");
+                        let price = document.createElement("p");
+                        price.classList.add("price");
+
+                        desc.textContent = descriptions[imageName]?.description || "No description available";
+                        price.textContent = descriptions[imageName]?.price || "Price not available";
+
+                        gridItem.appendChild(img);
+                        gridItem.appendChild(desc);
+                        gridItem.appendChild(price);
+                        gridContainer.appendChild(gridItem);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading descriptions:", error);
+                    logToFooter("Error loading descriptions.");
+                });
+        });
+    </script>
 </body>
 </html>
