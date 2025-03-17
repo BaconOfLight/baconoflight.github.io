@@ -41,33 +41,31 @@
     </style>
 </head>
 <body>
-    <div class="grid-container">
-        <script>
-            const folderPath = "images/"; // Change this to your actual folder path
-            const totalImages = 25; // Number of images
-            let availableImages = 0;
+    <div class="grid-container" id="grid-container"></div>
+    <script>
+        const folderPath = "images/"; // Change this to your actual folder path
+        const totalImages = 25; // Number of images
+        const gridContainer = document.getElementById("grid-container");
 
-            for (let i = 1; i <= totalImages; i++) {
-                let img = new Image();
-                img.src = `${folderPath}image${i}.jpg`;
-                img.onerror = () => console.warn(`Missing image: image${i}.jpg`);
-                img.onload = () => {
-                    availableImages++;
-                    document.write(`
-                        <div class="grid-item">
-                            <img src="${folderPath}image${i}.jpg" alt="Thumbnail ${i}">
-                            <p>Description ${i}</p>
-                        </div>
-                    `);
-                };
-            }
+        for (let i = 1; i <= totalImages; i++) {
+            let gridItem = document.createElement("div");
+            gridItem.className = "grid-item";
 
-            setTimeout(() => {
-                if (availableImages < totalImages) {
-                    console.warn(`Only ${availableImages} images were loaded.`);
-                }
-            }, 3000);
-        </script>
-    </div>
+            let img = document.createElement("img");
+            img.src = `${folderPath}image${i}.jpg`;
+            img.alt = `Thumbnail ${i}`;
+            img.onerror = function () {
+                this.src = "https://via.placeholder.com/100"; // Placeholder for missing images
+                console.warn(`Missing image: image${i}.jpg`);
+            };
+
+            let desc = document.createElement("p");
+            desc.textContent = `Description ${i}`;
+
+            gridItem.appendChild(img);
+            gridItem.appendChild(desc);
+            gridContainer.appendChild(gridItem);
+        }
+    </script>
 </body>
 </html>
