@@ -28,8 +28,29 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+        }
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            max-width: 800px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: auto;
+            min-height: 200px;
+            text-align: center;
+            word-wrap: break-word;
+            width: 100%;
+        }
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -38,6 +59,13 @@
             text-align: center;
         }
         .grid-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
             width: 100px;
             height: 100px;
             object-fit: cover;
