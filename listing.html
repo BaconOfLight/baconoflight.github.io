@@ -41,6 +41,7 @@
     </style>
 </head>
 <body>
+    <h1 style="text-align: center; margin-bottom: 20px;">Dave's Stuff for Sale</h1>
     <div class="grid-container" id="grid-container"></div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -48,26 +49,33 @@
             const totalImages = 25;
             const gridContainer = document.getElementById("grid-container");
 
-            for (let i = 1; i <= totalImages; i++) {
-                let gridItem = document.createElement("div");
-                gridItem.className = "grid-item";
+            // Fetch descriptions from JSON file
+            fetch("descriptions.json")
+                .then(response => response.json())
+                .then(descriptions => {
+                    for (let i = 1; i <= totalImages; i++) {
+                        let gridItem = document.createElement("div");
+                        gridItem.className = "grid-item";
 
-                let img = document.createElement("img");
-                img.src = `${folderPath}image${i}.jpg`;
-                img.alt = `Thumbnail ${i}`;
-                img.onload = () => console.log(`Loaded: image${i}.jpg`);
-                img.onerror = function () {
-                    this.src = "images/brokenimg.jpg";
-                    console.warn(`Missing image: image${i}.jpg`);
-                };
+                        let img = document.createElement("img");
+                        let imageName = `image${i}.jpg`;
+                        img.src = `${folderPath}${imageName}`;
+                        img.alt = `Thumbnail ${i}`;
+                        img.onload = () => console.log(`Loaded: ${imageName}`);
+                        img.onerror = function () {
+                            this.src = "images/brokenimg.jpg";
+                            console.warn(`Missing image: ${imageName}`);
+                        };
 
-                let desc = document.createElement("p");
-                desc.textContent = `Description ${i}`;
+                        let desc = document.createElement("p");
+                        desc.textContent = descriptions[imageName] || "No description available";
 
-                gridItem.appendChild(img);
-                gridItem.appendChild(desc);
-                gridContainer.appendChild(gridItem);
-            }
+                        gridItem.appendChild(img);
+                        gridItem.appendChild(desc);
+                        gridContainer.appendChild(gridItem);
+                    }
+                })
+                .catch(error => console.error("Error loading descriptions:", error));
         });
     </script>
 </body>
