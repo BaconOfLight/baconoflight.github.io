@@ -84,10 +84,14 @@
                         };
 
                         let desc = document.createElement("p");
-                        desc.textContent = descriptions[imageName] || "No description available";
+                        let price = document.createElement("p");
+                        price.style.fontWeight = "bold";
+                        desc.textContent = descriptions[imageName]?.description || "No description available";
+                        price.textContent = descriptions[imageName]?.price || "Price not available";
 
                         gridItem.appendChild(img);
                         gridItem.appendChild(desc);
+                        gridItem.appendChild(price);
                         gridContainer.appendChild(gridItem);
                     }
                 })

@@ -1,9 +1,9 @@
 {
-    "image1.jpg": "Vintage Camera - Excellent condition",
-    "image2.jpg": "Gaming Chair - Hardly used",
-    "image3.jpg": "Mountain Bike - Well maintained",
-    "image4.jpg": "Vinyl Record Collection - Various artists",
-    "image5.jpg": "Smartphone - Factory reset, unlocked",
+    "image1.jpg": { "description": "Vintage Camera - Excellent condition", "price": "$150" },
+    "image2.jpg": { "description": "Gaming Chair - Hardly used", "price": "$80" },
+    "image3.jpg": { "description": "Mountain Bike - Well maintained", "price": "$200" },
+    "image4.jpg": { "description": "Vinyl Record Collection - Various artists", "price": "$50" },
+    "image5.jpg": { "description": "Smartphone - Factory reset, unlocked", "price": "$300" }
     "image6.jpg": "Coffee Maker - Barely used",
     "image7.jpg": "Laptop - Works great, minor scratches",
     "image8.jpg": "Desk Lamp - Adjustable brightness",
