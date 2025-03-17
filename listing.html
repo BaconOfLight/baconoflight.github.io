@@ -28,6 +28,11 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 180px; /* Ensure enough space for image + text */
             text-align: center;
         }
         .grid-item img {
@@ -38,7 +43,16 @@
             border: 1px solid #ddd;
             cursor: pointer;
         }
-        .grid-item p {
+        .grid-item .description {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+        .grid-item .price {
+            font-weight: bold;
+            font-size: 14px;
+            color: #000;
+        }
             margin-top: 5px;
             font-size: 14px;
             color: #333;
@@ -84,6 +98,9 @@
                         };
 
                         let desc = document.createElement("p");
+                        desc.classList.add("description");
+                        let price = document.createElement("p");
+                        price.classList.add("price");
                         let price = document.createElement("p");
                         price.style.fontWeight = "bold";
                         desc.textContent = descriptions[imageName]?.description || "No description available";
