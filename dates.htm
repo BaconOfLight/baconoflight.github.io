@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Days of the Month - Japanese Study</title>
+    <title>Japanese Calendar Study</title>
     <style>
         * {
             margin: 0;
@@ -13,651 +13,411 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f7fa;
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .subtitle {
-            text-align: center;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 30px;
-        }
-
-        .mode-selector {
+        /* Top Bar */
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 30px;
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 15px;
-            margin-bottom: 30px;
             flex-wrap: wrap;
         }
 
-        .mode-btn {
-            padding: 12px 24px;
+        .top-bar select {
+            padding: 10px 20px;
+            font-size: 18px;
             border: none;
-            border-radius: 25px;
-            font-size: 16px;
+            border-radius: 10px;
+            background: white;
+            color: #333;
             cursor: pointer;
-            transition: all 0.3s ease;
             font-weight: 600;
         }
 
-        .mode-btn.primary {
+        .top-bar button {
+            padding: 10px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
             background: white;
-            color: #667eea;
+            color: #333;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
 
-        .mode-btn.secondary {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid rgba(255,255,255,0.5);
-        }
-
-        .mode-btn:hover {
+        .top-bar button:hover {
+            background: #f0f0f0;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        .mode-btn.active {
+        .top-bar button.active {
             background: #ffd700;
             color: #333;
         }
 
-        .panel {
-            background: white;
-            border-radius: 20px;
+        /* Calendar */
+        .calendar {
             padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            display: none;
         }
 
-        .panel.active {
-            display: block;
-        }
-
-        /* Reference Table */
-        .days-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        /* Action Row */
+        .action-row {
+            display: flex;
+            justify-content: center;
             gap: 15px;
-            max-height: 600px;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .day-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .day-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-
-        .day-number {
-            font-size: 28px;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .day-kanji {
-            font-size: 20px;
-            color: #333;
-            margin: 5px 0;
-        }
-
-        .day-reading {
-            font-size: 16px;
-            color: #666;
-            font-style: italic;
-        }
-
-        .day-romaji {
-            font-size: 14px;
-            color: #999;
-            margin-top: 5px;
-        }
-
-        /* Quiz Mode */
-        .quiz-container {
-            text-align: center;
-        }
-
-        .quiz-question {
-            font-size: 48px;
-            font-weight: bold;
-            color: #667eea;
-            margin: 30px 0;
-        }
-
-        .quiz-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .quiz-option {
-            padding: 20px;
-            border: 3px solid #e4e8ec;
-            border-radius: 15px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 18px;
-        }
-
-        .quiz-option:hover {
-            border-color: #667eea;
-            background: #f5f7fa;
-        }
-
-        .quiz-option.correct {
-            background: #d4edda;
-            border-color: #28a745;
-        }
-
-        .quiz-option.incorrect {
-            background: #f8d7da;
-            border-color: #dc3545;
-        }
-
-        .quiz-score {
-            font-size: 20px;
-            color: #333;
             margin-bottom: 20px;
         }
 
-        .quiz-feedback {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 20px 0;
-            min-height: 40px;
-        }
-
-        .quiz-feedback.correct {
-            color: #28a745;
-        }
-
-        .quiz-feedback.incorrect {
-            color: #dc3545;
-        }
-
-        /* Flashcard Mode */
-        .flashcard-container {
-            perspective: 1000px;
-            margin: 30px auto;
-            max-width: 400px;
-        }
-
-        .flashcard {
-            width: 100%;
-            height: 250px;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s ease;
-            cursor: pointer;
-        }
-
-        .flashcard.flipped {
-            transform: rotateY(180deg);
-        }
-
-        .flashcard-front, .flashcard-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .flashcard-front {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .flashcard-back {
-            background: white;
-            transform: rotateY(180deg);
-            border: 3px solid #667eea;
-        }
-
-        .flashcard-number {
-            font-size: 72px;
-            font-weight: bold;
-        }
-
-        .flashcard-label {
-            font-size: 18px;
-            opacity: 0.8;
-            margin-top: 10px;
-        }
-
-        .flashcard-kanji {
-            font-size: 48px;
-            color: #333;
-            margin: 10px 0;
-        }
-
-        .flashcard-reading {
-            font-size: 24px;
-            color: #667eea;
-            font-style: italic;
-        }
-
-        .flashcard-romaji {
-            font-size: 18px;
-            color: #999;
-            margin-top: 10px;
-        }
-
-        .flashcard-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .control-btn {
+        .action-btn {
             padding: 12px 30px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
+            font-size: 20px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            background: white;
+            color: #667eea;
             cursor: pointer;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
             background: #667eea;
             color: white;
         }
 
-        .control-btn:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
+        .action-btn.active {
+            background: #667eea;
+            color: white;
         }
 
-        .control-btn.secondary {
-            background: #e4e8ec;
-            color: #333;
-        }
-
-        /* Progress Bar */
-        .progress-container {
-            margin: 20px 0;
-        }
-
-        .progress-bar {
-            height: 10px;
-            background: #e4e8ec;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.5s ease;
-        }
-
-        .progress-text {
-            text-align: center;
-            margin-top: 10px;
-            color: #666;
-        }
-
-        /* Special Days Highlight */
-        .special-note {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 10px 10px 0;
-        }
-
-        .special-note h3 {
-            color: #856404;
+        /* Day Headers */
+        .day-headers {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
             margin-bottom: 10px;
         }
 
-        .special-note p {
-            color: #856404;
-            font-size: 14px;
-        }
-
-        /* Audio Button */
-        .audio-btn {
-            background: none;
-            border: 2px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+        .day-header {
+            text-align: center;
+            padding: 15px 10px;
+            background: #f0f2f5;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 18px;
-            color: #667eea;
-            transition: all 0.3s ease;
-            margin-top: 10px;
+            transition: all 0.2s ease;
         }
 
-        .audio-btn:hover {
+        .day-header:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .day-header.kanji {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .day-header.sunday {
+            color: #dc3545;
+        }
+
+        .day-header.saturday {
+            color: #0066cc;
+        }
+
+        .day-header:hover.sunday,
+        .day-header:hover.saturday {
+            color: white;
+        }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
             background: #667eea;
             color: white;
         }
 
-        @media (max-width: 600px) {
-            .quiz-options {
-                grid-template-columns: 1fr;
-            }
-            
-            .days-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            }
-            
-            .flashcard {
-                height: 200px;
-            }
-            
-            .flashcard-number {
-                font-size: 56px;
-            }
+        .calendar-day.empty {
+            cursor: default;
+            background: transparent;
+        }
+
+        .calendar-day.today {
+            border: 3px solid #667eea;
+        }
+
+        .calendar-day.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .calendar-day.week-highlight {
+            background: #e8ecf1;
+        }
+
+        .calendar-day.week-highlight.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .calendar-day.sunday {
+            color: #dc3545;
+        }
+
+        .calendar-day.saturday {
+            color: #0066cc;
+        }
+
+        .calendar-day.sunday:hover,
+        .calendar-day.saturday:hover {
+            color: white;
+        }
+
+        /* Week indicator */
+        .week-label {
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            font-size: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .calendar-day.selected .week-label {
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📅 Days of the Month</h1>
-        <p class="subtitle">Japanese Vocabulary Study Tool</p>
-
-        <div class="mode-selector">
-            <button class="mode-btn primary active" onclick="switchMode('reference')">📖 Reference</button>
-            <button class="mode-btn secondary" onclick="switchMode('flashcard')">🃏 Flashcards</button>
-            <button class="mode-btn secondary" onclick="switchMode('quiz')">🎯 Quiz</button>
+        <div class="top-bar">
+            <select id="year-select"></select>
+            <select id="month-select"></select>
+            <select id="day-select"></select>
         </div>
 
-        <!-- Reference Panel -->
-        <div id="reference-panel" class="panel active">
-            <div class="special-note">
-                <h3>⚠️ Important Notes</h3>
-                <p>Days 1-10, 14, 20, and 24 have irregular readings. Days 11-13, 15-19, 21-23, 25-31 follow the pattern: number + にち (nichi).</p>
-            </div>
-            <div class="days-grid" id="days-grid"></div>
-        </div>
-
-        <!-- Flashcard Panel -->
-        <div id="flashcard-panel" class="panel">
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="flashcard-progress" style="width: 0%"></div>
-                </div>
-                <p class="progress-text" id="flashcard-progress-text">Card 1 of 31</p>
-            </div>
-            
-            <div class="flashcard-container">
-                <div class="flashcard" id="flashcard" onclick="flipCard()">
-                    <div class="flashcard-front">
-                        <div class="flashcard-number" id="fc-number">1</div>
-                        <div class="flashcard-label">Click to flip</div>
-                    </div>
-                    <div class="flashcard-back">
-                        <div class="flashcard-kanji" id="fc-kanji">一日</div>
-                        <div class="flashcard-reading" id="fc-reading">ついたち</div>
-                        <div class="flashcard-romaji" id="fc-romaji">tsuitachi</div>
-                        <button class="audio-btn" onclick="event.stopPropagation(); playAudio()">🔊</button>
-                    </div>
-                </div>
+        <div class="calendar">
+            <div class="action-row">
+                <button class="action-btn" id="month-btn" onclick="playMonthSound()">1 月</button>
+                <button class="action-btn" id="week-btn" onclick="toggleWeek()">週</button>
             </div>
 
-            <div class="flashcard-controls">
-                <button class="control-btn secondary" onclick="prevCard()">← Previous</button>
-                <button class="control-btn" onclick="nextCard()">Next →</button>
-                <button class="control-btn secondary" onclick="shuffleCards()">🔀 Shuffle</button>
-            </div>
-        </div>
-
-        <!-- Quiz Panel -->
-        <div id="quiz-panel" class="panel">
-            <div class="quiz-container">
-                <div class="quiz-score">
-                    Score: <span id="score">0</span> / <span id="total">0</span>
-                    (<span id="percentage">0</span>%)
-                </div>
-                
-                <div class="quiz-question" id="quiz-question">1</div>
-                
-                <div class="quiz-options" id="quiz-options"></div>
-                
-                <div class="quiz-feedback" id="quiz-feedback"></div>
-                
-                <button class="control-btn" id="next-question-btn" onclick="nextQuestion()" style="display: none;">Next Question →</button>
-                <button class="control-btn secondary" onclick="restartQuiz()">🔄 Restart Quiz</button>
-            </div>
+            <div class="day-headers" id="day-headers"></div>
+            <div class="calendar-grid" id="calendar-grid"></div>
         </div>
     </div>
 
     <script>
-        // Days of the month data
-        const daysData = [
-            { number: 1, kanji: '一日', reading: 'ついたち', romaji: 'tsuitachi' },
-            { number: 2, kanji: '二日', reading: 'ふつか', romaji: 'futsuka' },
-            { number: 3, kanji: '三日', reading: 'みっか', romaji: 'mikka' },
-            { number: 4, kanji: '四日', reading: 'よっか', romaji: 'yokka' },
-            { number: 5, kanji: '五日', reading: 'いつか', romaji: 'itsuka' },
-            { number: 6, kanji: '六日', reading: 'むいか', romaji: 'muika' },
-            { number: 7, kanji: '七日', reading: 'なのか', romaji: 'nanoka' },
-            { number: 8, kanji: '八日', reading: 'ようか', romaji: 'youka' },
-            { number: 9, kanji: '九日', reading: 'ここのか', romaji: 'kokonoka' },
-            { number: 10, kanji: '十日', reading: 'とおか', romaji: 'tooka' },
-            { number: 11, kanji: '十一日', reading: 'じゅういちにち', romaji: 'juuichi nichi' },
-            { number: 12, kanji: '十二日', reading: 'じゅうににち', romaji: 'juuni nichi' },
-            { number: 13, kanji: '十三日', reading: 'じゅうさんにち', romaji: 'juusan nichi' },
-            { number: 14, kanji: '十四日', reading: 'じゅうよっか', romaji: 'juuyokka' },
-            { number: 15, kanji: '十五日', reading: 'じゅうごにち', romaji: 'juugo nichi' },
-            { number: 16, kanji: '十六日', reading: 'じゅうろくにち', romaji: 'juuroku nichi' },
-            { number: 17, kanji: '十七日', reading: 'じゅうななにち', romaji: 'juunana nichi' },
-            { number: 18, kanji: '十八日', reading: 'じゅうはちにち', romaji: 'juuhachi nichi' },
-            { number: 19, kanji: '十九日', reading: 'じゅうくにち', romaji: 'juuku nichi' },
-            { number: 20, kanji: '二十日', reading: 'はつか', romaji: 'hatsuka' },
-            { number: 21, kanji: '二十一日', reading: 'にじゅういちにち', romaji: 'nijuuichi nichi' },
-            { number: 22, kanji: '二十二日', reading: 'にじゅうににち', romaji: 'nijuuni nichi' },
-            { number: 23, kanji: '二十三日', reading: 'にじゅうさんにち', romaji: 'nijuusan nichi' },
-            { number: 24, kanji: '二十四日', reading: 'にじゅうよっか', romaji: 'nijuuyokka' },
-            { number: 25, kanji: '二十五日', reading: 'にじゅうごにち', romaji: 'nijuugo nichi' },
-            { number: 26, kanji: '二十六日', reading: 'にじゅうろくにち', romaji: 'nijuuroku nichi' },
-            { number: 27, kanji: '二十七日', reading: 'にじゅうななにち', romaji: 'nijuunana nichi' },
-            { number: 28, kanji: '二十八日', reading: 'にじゅうはちにち', romaji: 'nijuuhachi nichi' },
-            { number: 29, kanji: '二十九日', reading: 'にじゅうくにち', romaji: 'nijuuku nichi' },
-            { number: 30, kanji: '三十日', reading: 'さんじゅうにち', romaji: 'sanjuu nichi' },
-            { number: 31, kanji: '三十一日', reading: 'さんじゅういちにち', romaji: 'sanjuuichi nichi' }
+        const daysOfWeek = [
+            { kanji: '日', name: 'Sunday' },
+            { kanji: '月', name: 'Monday' },
+            { kanji: '火', name: 'Tuesday' },
+            { kanji: '水', name: 'Wednesday' },
+            { kanji: '木', name: 'Thursday' },
+            { kanji: '金', name: 'Friday' },
+            { kanji: '土', name: 'Saturday' }
         ];
 
-        let currentCardIndex = 0;
-        let shuffledDays = [...daysData];
-        let quizScore = 0;
-        let quizTotal = 0;
-        let currentQuestion = null;
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
 
-        // Initialize
-        function init() {
-            renderReferenceGrid();
-            updateFlashcard();
-            generateQuizQuestion();
+        const monthsJapanese = ['いち', 'に', 'さん', 'し', 'ご', 'ろく', 'しち', 'はち', 'く', 'じゅう', 'じゅういち', 'じゅうに'];
+
+        const daysReadings = [
+            null, 'ついたち', 'ふつか', 'みっか', 'よっか', 'いつか', 'むいか', 'なのか', 'ようか', 'ここのか', 'とおか',
+            'じゅういちにち', 'じゅうににち', 'じゅうさんにち', 'じゅうよっか', 'じゅうごにち', 'じゅうろくにち', 'じゅうななにち', 'じゅうはちにち', 'じゅうくにち', 'はつか',
+            'にじゅういちにち', 'にじゅうににち', 'にじゅうさんにち', 'にじゅうよっか', 'にじゅうごにち', 'にじゅうろくにち', 'にじゅうななにち', 'にじゅうはちにち', 'にじゅうくにち', 'さんじゅうにち',
+            'さんじゅういちにち'
+        ];
+
+        let selectedDay = new Date().getDate();
+        let showWeek = false;
+
+        // Initialize year selector (1900-2030)
+        const yearSelect = document.getElementById('year-select');
+        const currentYear = new Date().getFullYear();
+        for (let year = 1900; year <= 2030; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            if (year === currentYear) option.selected = true;
+            yearSelect.appendChild(option);
         }
 
-        // Switch between modes
-        function switchMode(mode) {
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.classList.remove('active', 'primary');
-                btn.classList.add('secondary');
-            });
-            event.target.classList.remove('secondary');
-            event.target.classList.add('active', 'primary');
+        // Initialize month selector
+        const monthSelect = document.getElementById('month-select');
+        const currentMonth = new Date().getMonth();
+        months.forEach((month, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = month;
+            if (index === currentMonth) option.selected = true;
+            monthSelect.appendChild(option);
+        });
 
-            document.querySelectorAll('.panel').forEach(panel => {
-                panel.classList.remove('active');
-            });
-            document.getElementById(`${mode}-panel`).classList.add('active');
-
-            if (mode === 'quiz') {
-                generateQuizQuestion();
-            }
+        // Initialize day selector
+        const daySelect = document.getElementById('day-select');
+        for (let day = 1; day <= 31; day++) {
+            const option = document.createElement('option');
+            option.value = day;
+            option.textContent = day;
+            if (day === selectedDay) option.selected = true;
+            daySelect.appendChild(option);
         }
 
-        // Render reference grid
-        function renderReferenceGrid() {
-            const grid = document.getElementById('days-grid');
-            grid.innerHTML = daysData.map(day => `
-                <div class="day-card" onclick="playDayAudio(${day.number})">
-                    <div class="day-number">${day.number}</div>
-                    <div class="day-kanji">${day.kanji}</div>
-                    <div class="day-reading">${day.reading}</div>
-                    <div class="day-romaji">${day.romaji}</div>
-                    <button class="audio-btn" style="width: 30px; height: 30px; font-size: 14px;">🔊</button>
+        // Render day headers
+        function renderDayHeaders() {
+            const container = document.getElementById('day-headers');
+            container.innerHTML = daysOfWeek.map((day, index) => `
+                <div class="day-header ${index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}" 
+                     onclick="playDaySound('${day.name}')">
+                    <div class="kanji">${day.kanji}</div>
                 </div>
             `).join('');
         }
 
-        // Flashcard functions
-        function updateFlashcard() {
-            const day = shuffledDays[currentCardIndex];
-            document.getElementById('fc-number').textContent = day.number;
-            document.getElementById('fc-kanji').textContent = day.kanji;
-            document.getElementById('fc-reading').textContent = day.reading;
-            document.getElementById('fc-romaji').textContent = day.romaji;
+        // Get start and end of week for a date
+        function getWeekRange(date) {
+            const day = date.getDay();
+            const diff = date.getDate() - day;
+            const startOfWeek = new Date(date.setDate(diff));
+            const endOfWeek = new Date(date.setDate(diff + 6));
+            return { start: startOfWeek, end: endOfWeek };
+        }
+
+        // Render calendar grid
+        function renderCalendar() {
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            const selected = parseInt(daySelect.value);
             
-            document.getElementById('flashcard').classList.remove('flipped');
-            updateFlashcardProgress();
-        }
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const today = new Date();
+            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
-        function flipCard() {
-            document.getElementById('flashcard').classList.toggle('flipped');
-        }
-
-        function nextCard() {
-            currentCardIndex = (currentCardIndex + 1) % shuffledDays.length;
-            updateFlashcard();
-        }
-
-        function prevCard() {
-            currentCardIndex = (currentCardIndex - 1 + shuffledDays.length) % shuffledDays.length;
-            updateFlashcard();
-        }
-
-        function shuffleCards() {
-            shuffledDays = [...daysData].sort(() => Math.random() - 0.5);
-            currentCardIndex = 0;
-            updateFlashcard();
-        }
-
-        function updateFlashcardProgress() {
-            const progress = ((currentCardIndex + 1) / shuffledDays.length) * 100;
-            document.getElementById('flashcard-progress').style.width = `${progress}%`;
-            document.getElementById('flashcard-progress-text').textContent = 
-                `Card ${currentCardIndex + 1} of ${shuffledDays.length}`;
-        }
-
-        // Quiz functions
-        function generateQuizQuestion() {
-            const day = daysData[Math.floor(Math.random() * daysData.length)];
-            currentQuestion = day;
-
-            document.getElementById('quiz-question').textContent = day.number;
-            document.getElementById('quiz-feedback').textContent = '';
-            document.getElementById('next-question-btn').style.display = 'none';
-
-            // Generate options (1 correct + 3 wrong)
-            let options = [day];
-            while (options.length < 4) {
-                const randomDay = daysData[Math.floor(Math.random() * daysData.length)];
-                if (!options.find(o => o.number === randomDay.number)) {
-                    options.push(randomDay);
-                }
-            }
-            options.sort(() => Math.random() - 0.5);
-
-            const optionsContainer = document.getElementById('quiz-options');
-            optionsContainer.innerHTML = options.map(opt => `
-                <div class="quiz-option" onclick="checkAnswer(${opt.number}, this)">
-                    <div style="font-size: 24px; font-weight: bold;">${opt.kanji}</div>
-                    <div style="font-size: 16px; color: #666;">${opt.reading}</div>
-                    <div style="font-size: 14px; color: #999;">${opt.romaji}</div>
-                </div>
-            `).join('');
-        }
-
-        function checkAnswer(selectedNumber, element) {
-            if (document.getElementById('next-question-btn').style.display === 'block') {
-                return; // Already answered
+            // Get week range for selected day
+            let weekStart = null, weekEnd = null;
+            if (showWeek && selected <= daysInMonth) {
+                const selectedDate = new Date(year, month, selected);
+                const weekRange = getWeekRange(selectedDate);
+                weekStart = weekRange.start;
+                weekEnd = weekRange.end;
             }
 
-            quizTotal++;
-            const isCorrect = selectedNumber === currentQuestion.number;
-            
-            if (isCorrect) {
-                quizScore++;
-                element.classList.add('correct');
-                document.getElementById('quiz-feedback').textContent = '✅ Correct!';
-                document.getElementById('quiz-feedback').className = 'quiz-feedback correct';
-            } else {
-                element.classList.add('incorrect');
-                document.getElementById('quiz-feedback').textContent = `❌ Wrong! The answer was ${currentQuestion.kanji} (${currentQuestion.reading})`;
-                document.getElementById('quiz-feedback').className = 'quiz-feedback incorrect';
+            const container = document.getElementById('calendar-grid');
+            let html = '';
+
+            // Empty cells for days before the 1st
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
+
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
                 
-                // Highlight correct answer
-                document.querySelectorAll('.quiz-option').forEach(opt => {
-                    if (opt.textContent.includes(currentQuestion.kanji)) {
-                        opt.classList.add('correct');
+                let classes = 'calendar-day';
+                if (dayOfWeek === 0) classes += ' sunday';
+                if (dayOfWeek === 6) classes += ' saturday';
+                if (isCurrentMonth && day === today.getDate()) classes += ' today';
+                if (day === selected) classes += ' selected';
+                
+                // Check if this day is in the selected week
+                if (showWeek && weekStart && weekEnd) {
+                    if (date >= weekStart && date <= weekEnd) {
+                        classes += ' week-highlight';
                     }
-                });
+                }
+
+                html += `<div class="${classes}" onclick="selectDay(${day})">${day}</div>`;
             }
 
-            document.getElementById('score').textContent = quizScore;
-            document.getElementById('total').textContent = quizTotal;
-            document.getElementById('percentage').textContent = 
-                Math.round((quizScore / quizTotal) * 100);
-            document.getElementById('next-question-btn').style.display = 'inline-block';
+            container.innerHTML = html;
+            
+            // Update month button text
+            document.getElementById('month-btn').textContent = `${month + 1} 月`;
         }
 
-        function nextQuestion() {
-            generateQuizQuestion();
+        // Select a day and play sound
+        function selectDay(day) {
+            selectedDay = day;
+            daySelect.value = day;
+            playDayReading(day);
+            renderCalendar();
         }
 
-        function restartQuiz() {
-            quizScore = 0;
-            quizTotal = 0;
-            document.getElementById('score').textContent = 0;
-            document.getElementById('total').textContent = 0;
-            document.getElementById('percentage').textContent = 0;
-            generateQuizQuestion();
+        // Toggle week highlight
+        function toggleWeek() {
+            showWeek = !showWeek;
+            document.getElementById('week-btn').classList.toggle('active', showWeek);
+            renderCalendar();
         }
 
-        // Audio functions (using Web Speech API)
-        function playAudio() {
-            const day = shuffledDays[currentCardIndex];
-            speakJapanese(day.reading);
+        // Audio functions
+        function playDaySound(dayName) {
+            const sounds = {
+                'Sunday': 'にちようび',
+                'Monday': 'げつようび',
+                'Tuesday': 'かようび',
+                'Wednesday': 'すいようび',
+                'Thursday': 'もくようび',
+                'Friday': 'きんようび',
+                'Saturday': 'どようび'
+            };
+            speakJapanese(sounds[dayName]);
         }
 
-        function playDayAudio(number) {
-            const day = daysData.find(d => d.number === number);
-            speakJapanese(day.reading);
+        function playMonthSound() {
+            const month = parseInt(monthSelect.value);
+            const num = monthsJapanese[month];
+            speakJapanese(num + 'がつ');
+        }
+
+        function playDayReading(day) {
+            const reading = daysReadings[day];
+            if (reading) {
+                speakJapanese(reading);
+            }
         }
 
         function speakJapanese(text) {
@@ -666,27 +426,29 @@
                 utterance.lang = 'ja-JP';
                 utterance.rate = 0.8;
                 speechSynthesis.speak(utterance);
-            } else {
-                alert('Audio not supported in this browser');
             }
         }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (document.getElementById('flashcard-panel').classList.contains('active')) {
-                if (e.key === 'ArrowRight') nextCard();
-                if (e.key === 'ArrowLeft') prevCard();
-                if (e.key === ' ' || e.key === 'Enter') flipCard();
+        // Event listeners
+        yearSelect.addEventListener('change', renderCalendar);
+        monthSelect.addEventListener('change', () => {
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            if (selectedDay > daysInMonth) {
+                selectedDay = daysInMonth;
+                daySelect.value = selectedDay;
             }
-            if (document.getElementById('quiz-panel').classList.contains('active')) {
-                if (e.key === 'Enter' && document.getElementById('next-question-btn').style.display === 'block') {
-                    nextQuestion();
-                }
-            }
+            renderCalendar();
+        });
+        daySelect.addEventListener('change', () => {
+            selectedDay = parseInt(daySelect.value);
+            renderCalendar();
         });
 
-        // Initialize on load
-        init();
+        // Initialize
+        renderDayHeaders();
+        renderCalendar();
     </script>
 </body>
 </html>
