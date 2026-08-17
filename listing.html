@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dave's Stuff for Sale</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            height: auto;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+            background-color: #f4f4f4;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 800px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            align-items: start;
+        }
+		@media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            .grid-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+        .grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: auto;
+            min-height: 200px;
+            text-align: center;
+        }
+        .grid-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .grid-item .description {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+        .grid-item .price {
+            font-weight: bold;
+            font-size: 14px;
+            color: #000;
+        }
+            margin-top: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body style="padding-top: 60px;">
+    
+    <div style="text-align: center; width: 100%; margin-bottom: 40px;">
+        <h1>Dave's Stuff for Sale</h1>
+    </div>
+    
+    <div class="grid-container" id="grid-container"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const folderPath = "images/"; // Ensure this path is correct
+            const totalImages = 24;
+            const gridContainer = document.getElementById("grid-container");
+
+            function openImageInNewWindow(imageSrc) {
+                window.open(imageSrc, "_blank");
+            }
+
+            // Fetch descriptions from JSON file
+            fetch("descriptions.json")
+                .then(response => response.text())  // Get raw text response
+                .then(text => {
+                    <!--logToFooter(`Raw JSON response: ${text}`);  // Debugging output-->
+                    return JSON.parse(text);  // Parse JSON manually
+                })
+                .then(descriptions => {
+                    for (let i = 1; i <= totalImages; i++) {
+                        let gridItem = document.createElement("div");
+                        gridItem.className = "grid-item";
+
+                        let img = document.createElement("img");
+                        let imageName = `image${i}.jpg`;
+                        img.src = `${folderPath}${imageName}`;
+                        img.alt = `Thumbnail ${i}`;
+                        img.onclick = function () {
+                            openImageInNewWindow(this.src);
+                        };
+                        img.onload = () => console.log(`Loaded: ${imageName}`);
+                        img.onerror = function () {
+                            this.src = "images/brokenimg.jpg";
+                            console.warn(`Missing image: ${imageName}`);
+                        };
+
+                        let desc = document.createElement("p");
+                        desc.classList.add("description");
+                        let price = document.createElement("p");
+                        price.classList.add("price");
+                        
+                        desc.textContent = descriptions[imageName]?.description || "No description available";
+                        price.textContent = descriptions[imageName]?.price || "Price not available";
+
+                        gridItem.appendChild(img);
+                        gridItem.appendChild(desc);
+                        gridItem.appendChild(price);
+                        gridContainer.appendChild(gridItem);
+                    }
+                })
+                .catch(error => console.error("Error loading descriptions:", error));
+        });
+    </script>
+	
+	<!-- preserving footer console output for future use
+    <footer style="margin-top: 20px; width: 100%; text-align: center; padding: 10px; background: #ddd;">
+        <p id="console-output" style="font-size: 12px; white-space: pre-wrap;">Console Output:</p>
+    </footer>
+    <script>
+        function logToFooter(message) {
+            const footer = document.getElementById("console-output");
+            footer.textContent += `
+${message}`;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            logToFooter("DOM Loaded, starting image load...");
+            const folderPath = "images/";
+            const totalImages = 25;
+            const gridContainer = document.getElementById("grid-container");
+
+            function openImageInNewWindow(imageSrc) {
+                window.open(imageSrc, "_blank");
+            }
+
+            fetch("descriptions.json")
+                .then(response => response.json())
+                .then(descriptions => {
+                    logToFooter("Descriptions loaded successfully.");
+                    for (let i = 1; i <= totalImages; i++) {
+                        let gridItem = document.createElement("div");
+                        gridItem.className = "grid-item";
+
+                        let img = document.createElement("img");
+                        let imageName = `image${i}.jpg`;
+                        img.src = `${folderPath}${imageName}`;
+                        img.alt = `Thumbnail ${i}`;
+                        img.onclick = function () {
+                            openImageInNewWindow(this.src);
+                        };
+                        img.onload = () => logToFooter(`Loaded: ${imageName}`);
+                        img.onerror = function () {
+                            this.src = "images/brokenimg.jpg";
+                            logToFooter(`Missing image: ${imageName}`);
+                        };
+
+                        let desc = document.createElement("p");
+                        desc.classList.add("description");
+                        let price = document.createElement("p");
+                        price.classList.add("price");
+
+                        desc.textContent = descriptions[imageName]?.description || "No description available";
+                        price.textContent = descriptions[imageName]?.price || "Price not available";
+
+                        gridItem.appendChild(img);
+                        gridItem.appendChild(desc);
+                        gridItem.appendChild(price);
+                        gridContainer.appendChild(gridItem);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading descriptions:", error);
+                    logToFooter("Error loading descriptions.");
+                });
+        });
+    </script>
+	-->
+</body>
+</html>
