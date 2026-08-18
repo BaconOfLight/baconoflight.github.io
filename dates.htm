@@ -254,17 +254,24 @@
 
         <div class="calendar">
             <div class="action-row">
+			    <button class="action-btn" id="year-btn" onclick="playYearSound()">2026 年</button>
                 <button class="action-btn" id="month-btn" onclick="playMonthSound()">1 月</button>
-                <button class="action-btn" id="week-btn" onclick="toggleWeek()">週</button>
+				<button class="action-btn" id="day-btn" onclick="playDaySoundSelected()">15 日</button>
+				<button class="action-btn" id="date-btn" onclick="playFullDate()">年月日</button>
+
             </div>
 
             <div class="day-headers" id="day-headers"></div>
             <div class="calendar-grid" id="calendar-grid"></div>
+			<div class="action-row">
+				<button class="action-btn" id="week-btn" onclick="toggleWeek()">週</button>
+			</div>
         </div>
 		<!-- Add to bottom of .container, before closing div -->
 		<div class="footer">
 			<label>Voice: <select id="voice-select"></select></label>
 		</div>
+
     </div>
 
     <script>
@@ -326,6 +333,8 @@
             if (day === selectedDay) option.selected = true;
             daySelect.appendChild(option);
         }
+
+		document.getElementById('day-btn').textContent = selectedDay + '日';
 
         // Render day headers
         function renderDayHeaders() {
@@ -401,15 +410,19 @@
             
             // Update month button text
             document.getElementById('month-btn').textContent = `${month + 1} 月`;
+			
+			// Update year button text
+			document.getElementById('year-btn').textContent = yearSelect.value + '年';
         }
 
         // Select a day and play sound
-        function selectDay(day) {
-            selectedDay = day;
-            daySelect.value = day;
-            playDayReading(day);
-            renderCalendar();
-        }
+		function selectDay(day) {
+			selectedDay = day;
+			daySelect.value = day;
+			document.getElementById('day-btn').textContent = day + '日';
+			playDayReading(day);
+			renderCalendar();
+		}
 
         // Toggle week highlight
         function toggleWeek() {
@@ -491,12 +504,76 @@
 				speechSynthesis.speak(utterance);
 			}
 		}
+	
+		function playDaySoundSelected() {
+			const day = parseInt(daySelect.value);
+			playDayReading(day);
+		}
+
+		function getYearReading(year) {
+			// Years ending in 00 use full reading
+			if (year % 100 === 0) {
+				const thousands = Math.floor(year / 1000);
+				const hundreds = Math.floor((year % 1000) / 100);
+				
+				let reading = '';
+				
+				// Thousands place
+				if (thousands === 1) {
+					reading += 'せん';
+				} else if (thousands > 1) {
+					reading += ['','いち','に','さん','よ','ご','ろく','なな','はち','きゅう'][thousands] + 'せん';
+				}
+				
+				// Hundreds place (with sound changes)
+				if (hundreds > 0) {
+					const hundredReadings = {
+						1: 'ひゃく',
+						2: 'にひゃく',
+						3: 'さんびゃく',
+						4: 'よんひゃく',
+						5: 'ごひゃく',
+						6: 'ろっぴゃく',
+						7: 'ななひゃく',
+						8: 'はっぴゃく',
+						9: 'きゅうひゃく'
+					};
+					reading += hundredReadings[hundreds];
+				}
+				
+				return reading + 'ねん';
+			} else {
+				// Digit-by-digit for all other years
+				const digits = year.toString().split('');
+				const readings = ['ゼロ','いち','に','さん','よ','ご','ろく','なな','はち','きゅう'];
+				return digits.map(d => readings[parseInt(d)]).join(' ') + ' ねん';
+			}
+		}
+
+		function playYearSound() {
+			const year = parseInt(yearSelect.value);
+			speakJapanese(getYearReading(year));
+		}
+
+		function playFullDate() {
+			const year = parseInt(yearSelect.value);
+			const month = parseInt(monthSelect.value) + 1;
+			const day = parseInt(daySelect.value);
+			
+			// Build full date reading: year + month + day
+			let reading = getYearReading(year) + ' ' + monthsJapanese[month - 1] + daysReadings[day];
+			
+			speakJapanese(reading);
+		}
 
 		// Voices load asynchronously
 		speechSynthesis.onvoiceschanged = initVoices;
 
         // Event listeners
-        yearSelect.addEventListener('change', renderCalendar);
+        yearSelect.addEventListener('change', () => {
+			document.getElementById('year-btn').textContent = yearSelect.value + '年';
+			renderCalendar();
+		});
         monthSelect.addEventListener('change', () => {
             const year = parseInt(yearSelect.value);
             const month = parseInt(monthSelect.value);
