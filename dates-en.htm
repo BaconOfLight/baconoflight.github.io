@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Study</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .top-bar select {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .top-bar button {
+            padding: 10px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .top-bar button:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .top-bar button.active {
+            background: #ffd700;
+            color: #333;
+        }
+
+        /* Calendar */
+        .calendar {
+            padding: 30px;
+        }
+
+        /* Action Row */
+        .action-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            padding: 12px 30px;
+            font-size: 20px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Day Headers */
+        .day-headers {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .day-header {
+            text-align: center;
+            padding: 15px 10px;
+            background: #f0f2f5;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .day-header:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .day-header.kanji {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .day-header.sunday {
+            color: #dc3545;
+        }
+
+        .day-header.saturday {
+            color: #0066cc;
+        }
+
+        .day-header:hover.sunday,
+        .day-header:hover.saturday {
+            color: white;
+        }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .calendar-day.empty {
+            cursor: default;
+            background: transparent;
+        }
+
+        .calendar-day.today {
+            border: 3px solid #667eea;
+        }
+
+        .calendar-day.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .calendar-day.week-highlight {
+            background: #e8ecf1;
+        }
+
+        .calendar-day.week-highlight.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .calendar-day.sunday {
+            color: #dc3545;
+        }
+
+        .calendar-day.saturday {
+            color: #0066cc;
+        }
+
+        .calendar-day.sunday:hover,
+        .calendar-day.saturday:hover {
+            color: white;
+        }
+
+        /* Week indicator */
+        .week-label {
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            font-size: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .calendar-day.selected .week-label {
+            color: white;
+        }
+		
+		.footer {
+			background: #f0f2f5;
+			padding: 20px 30px;
+			text-align: center;
+			border-top: 1px solid #e4e8ec;
+		}
+
+		.footer label {
+			font-size: 14px;
+			color: #666;
+		}
+
+		.footer select {
+			padding: 8px 15px;
+			font-size: 14px;
+			border: 1px solid #ccc;
+			border-radius: 8px;
+			margin-left: 10px;
+			cursor: pointer;
+		}
+		
+		@media (max-width: 600px) {
+			.top-bar {
+				padding: 15px;
+				gap: 10px;
+			}
+
+			.top-bar select {
+				padding: 8px 12px;
+				font-size: 14px;
+			}
+
+			.action-row {
+				gap: 8px;
+				margin-bottom: 15px;
+			}
+
+			.action-btn {
+				padding: 8px 15px;
+				font-size: 14px;
+			}
+
+			.calendar {
+				padding: 15px;
+			}
+
+			.day-header.kanji {
+				font-size: 20px;
+			}
+
+			.calendar-day {
+				font-size: 16px;
+			}
+
+			.footer {
+				padding: 15px;
+			}
+
+			.footer select {
+				padding: 6px 10px;
+				font-size: 12px;
+			}
+		}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <select id="year-select"></select>
+            <select id="month-select"></select>
+            <select id="day-select"></select>
+        </div>
+
+        <div class="calendar">
+            <div class="action-row">
+			    <button class="action-btn" id="year-btn" onclick="playYearSound()">2026</button>
+                <button class="action-btn" id="month-btn" onclick="playMonthSound()">January</button>
+				<button class="action-btn" id="day-btn" onclick="playDaySoundSelected()">15th</button>
+				<button class="action-btn" id="date-btn" onclick="playFullDate()">Full Date</button>
+            </div>
+
+            <div class="day-headers" id="day-headers"></div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+			<div class="action-row">
+				<button class="action-btn" id="week-btn" onclick="toggleWeek()">Week</button>
+			</div>
+        </div>
+		<div class="footer">
+			<label>Voice: <select id="voice-select"></select></label>
+		</div>
+    </div>
+
+    <script>
+        const daysOfWeek = [
+            { kanji: '日', name: 'Sunday' },
+            { kanji: '月', name: 'Monday' },
+            { kanji: '火', name: 'Tuesday' },
+            { kanji: '水', name: 'Wednesday' },
+            { kanji: '木', name: 'Thursday' },
+            { kanji: '金', name: 'Friday' },
+            { kanji: '土', name: 'Saturday' }
+        ];
+
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        // English ordinal suffixes for days
+		function getOrdinal(n) {
+			const s = ['th', 'st', 'nd', 'rd'];
+			const v = n % 100;
+			
+			// 11, 12, 13 are exceptions (always "th")
+			if (v >= 11 && v <= 13) {
+				return n + 'th';
+			}
+			
+			return n + (s[(v - 20) % 10] || s[v] || s[0]);
+		}
+
+        let selectedDay = new Date().getDate();
+        let showWeek = false;
+
+        // Initialize year selector (1900-2030)
+        const yearSelect = document.getElementById('year-select');
+        const currentYear = new Date().getFullYear();
+        for (let year = 1900; year <= 2030; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            if (year === currentYear) option.selected = true;
+            yearSelect.appendChild(option);
+        }
+
+        // Initialize month selector
+        const monthSelect = document.getElementById('month-select');
+        const currentMonth = new Date().getMonth();
+        months.forEach((month, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = month;
+            if (index === currentMonth) option.selected = true;
+            monthSelect.appendChild(option);
+        });
+
+        // Initialize day selector
+        const daySelect = document.getElementById('day-select');
+        for (let day = 1; day <= 31; day++) {
+            const option = document.createElement('option');
+            option.value = day;
+            option.textContent = day;
+            if (day === selectedDay) option.selected = true;
+            daySelect.appendChild(option);
+        }
+
+		document.getElementById('day-btn').textContent = getOrdinal(selectedDay);
+
+        // Render day headers
+        function renderDayHeaders() {
+            const container = document.getElementById('day-headers');
+            container.innerHTML = daysOfWeek.map((day, index) => `
+                <div class="day-header ${index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}" 
+                     onclick="playDaySound('${day.name}')">
+                    <div class="kanji">${day.kanji}</div>
+                </div>
+            `).join('');
+        }
+
+        // Get start and end of week for a date
+        function getWeekRange(date) {
+            const day = date.getDay();
+            const diff = date.getDate() - day;
+            const startOfWeek = new Date(date.setDate(diff));
+            const endOfWeek = new Date(date.setDate(diff + 6));
+            return { start: startOfWeek, end: endOfWeek };
+        }
+
+        // Render calendar grid
+        function renderCalendar() {
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            const selected = parseInt(daySelect.value);
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const today = new Date();
+            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+            // Get week range for selected day
+            let weekStart = null, weekEnd = null;
+            if (showWeek && selected <= daysInMonth) {
+                const selectedDate = new Date(year, month, selected);
+                const weekRange = getWeekRange(selectedDate);
+                weekStart = weekRange.start;
+                weekEnd = weekRange.end;
+            }
+
+            const container = document.getElementById('calendar-grid');
+            let html = '';
+
+            // Empty cells for days before the 1st
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
+
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
+                
+                let classes = 'calendar-day';
+                if (dayOfWeek === 0) classes += ' sunday';
+                if (dayOfWeek === 6) classes += ' saturday';
+                if (isCurrentMonth && day === today.getDate()) classes += ' today';
+                if (day === selected) classes += ' selected';
+                
+                if (showWeek && weekStart && weekEnd) {
+                    if (date >= weekStart && date <= weekEnd) {
+                        classes += ' week-highlight';
+                    }
+                }
+
+                html += `<div class="${classes}" onclick="selectDay(${day})">${day}</div>`;
+            }
+
+            container.innerHTML = html;
+            
+            document.getElementById('month-btn').textContent = months[month];
+			document.getElementById('year-btn').textContent = yearSelect.value;
+        }
+
+        // Select a day and play sound
+		function selectDay(day) {
+			selectedDay = day;
+			daySelect.value = day;
+			document.getElementById('day-btn').textContent = getOrdinal(day);
+			playDaySoundSelected();
+			renderCalendar();
+		}
+
+        // Toggle week highlight
+        function toggleWeek() {
+            showWeek = !showWeek;
+            document.getElementById('week-btn').classList.toggle('active', showWeek);
+            renderCalendar();
+        }
+
+        // Audio functions
+        function playDaySound(dayName) {
+            speakEnglish(dayName);
+        }
+
+        function playMonthSound() {
+            const month = parseInt(monthSelect.value);
+            speakEnglish(months[month]);
+        }
+
+		function playDaySoundSelected() {
+			const day = parseInt(daySelect.value);
+			speakEnglish(getDayWord(day));
+		}
+
+        function playYearSound() {
+            const year = parseInt(yearSelect.value);
+            speakEnglish(year.toString());
+        }
+
+        function playFullDate() {
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            const day = parseInt(daySelect.value);
+            
+            const reading = months[month] + ' ' + getOrdinal(day) + ', ' + year;
+            speakEnglish(reading);
+        }
+
+        function speakEnglish(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                if (selectedVoice) utterance.voice = selectedVoice;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+		let selectedVoice = null;
+
+		// Populate voice selector
+		function initVoices() {
+			const voiceSelect = document.getElementById('voice-select');
+			const voices = speechSynthesis.getVoices();
+			const enVoices = voices.filter(v => v.lang.includes('en'));
+			
+			const defaultOpt = document.createElement('option');
+			defaultOpt.value = '';
+			defaultOpt.textContent = 'Default';
+			voiceSelect.appendChild(defaultOpt);
+			
+			enVoices.forEach(voice => {
+				const opt = document.createElement('option');
+				opt.value = voice.name;
+				opt.textContent = `${voice.name} (${voice.lang})`;
+				voiceSelect.appendChild(opt);
+			});
+			
+			voiceSelect.addEventListener('change', () => {
+				const voices = speechSynthesis.getVoices();
+				selectedVoice = voices.find(v => v.name === voiceSelect.value) || null;
+			});
+		}
+		
+		//eturns the spoken word for each day
+		function getDayWord(n) {
+			const words = {
+				1: 'first', 2: 'second', 3: 'third', 4: 'fourth', 5: 'fifth',
+				6: 'sixth', 7: 'seventh', 8: 'eighth', 9: 'ninth', 10: 'tenth',
+				11: 'eleventh', 12: 'twelf', 13: 'thirteenth', 14: 'fourteenth', 15: 'fifteenth',
+				16: 'sixteenth', 17: 'seventeenth', 18: 'eighteenth', 19: 'nineteenth', 20: 'twentieth',
+				21: 'twenty first', 22: 'twenty second', 23: 'twenty third', 24: 'twenty fourth', 25: 'twenty fifth',
+				26: 'twenty sixth', 27: 'twenty seventh', 28: 'twenty eighth', 29: 'twenty ninth', 30: 'thirtieth',
+				31: 'thirty first'
+			};
+			return words[n] || n + 'th';
+		}
+		// Voices load asynchronously
+		speechSynthesis.onvoiceschanged = initVoices;
+
+        // Event listeners
+        yearSelect.addEventListener('change', () => {
+			document.getElementById('year-btn').textContent = yearSelect.value;
+			renderCalendar();
+		});
+        monthSelect.addEventListener('change', () => {
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            if (selectedDay > daysInMonth) {
+                selectedDay = daysInMonth;
+                daySelect.value = selectedDay;
+            }
+            renderCalendar();
+        });
+        daySelect.addEventListener('change', () => {
+            selectedDay = parseInt(daySelect.value);
+            renderCalendar();
+        });
+
+        // Initialize
+        renderDayHeaders();
+        renderCalendar();
+    </script>
+</body>
+</html>
