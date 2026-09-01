@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Calendar Study</title>
+    <link rel="stylesheet" href="dates.css">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <select id="year-select"></select>
+            <select id="month-select"></select>
+            <select id="day-select"></select>
+        </div>
+
+        <div class="calendar">
+            <div class="action-row">
+                <button class="action-btn" id="year-btn" onclick="playYearSound()">2026 年</button>
+                <button class="action-btn" id="month-btn" onclick="playMonthSound()">1 月</button>
+                <button class="action-btn" id="day-btn" onclick="playDaySoundSelected()">15 日</button>
+                <button class="action-btn" id="date-btn" onclick="playFullDate()">年月日</button>
+            </div>
+
+            <div class="day-headers" id="day-headers"></div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+            <div class="action-row">
+                <button class="action-btn" id="week-btn" onclick="toggleWeek()">週</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <label>Voice: <select id="voice-select"></select></label>
+        </div>
+    </div>
+
+    <script>
+        const daysOfWeek = [
+            { kanji: '日', name: 'Sunday' },
+            { kanji: '月', name: 'Monday' },
+            { kanji: '火', name: 'Tuesday' },
+            { kanji: '水', name: 'Wednesday' },
+            { kanji: '木', name: 'Thursday' },
+            { kanji: '金', name: 'Friday' },
+            { kanji: '土', name: 'Saturday' }
+        ];
+
+        const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+
+        const monthsJapanese = ['一月', '二月', '三月', '四月', '五月', '六月', 
+                                '七月', '八月', '九月', '十月', '十一月', '十二月'];
+
+        const daysReadings = [
+            null, '一日', '二日', '三日', '四日', '五日', '六日', '七日', '八日', '九日', '十日',
+            '十一日', '十二日', '十三日', '十四日', '十五日', '十六日', '十七日', '十八日', '十九日', '二十日',
+            '二十一日', '二十二日', '二十三日', '二十四日', '二十五日', '二十六日', '二十七日', '二十八日', '二十九日', '三十日',
+            '三十一日'
+        ];
+
+        let selectedDay = new Date().getDate();
+        let showWeek = false;
+        let selectedVoice = null;
+		let yearSelect, monthSelect, daySelect;
+
+        // Initialize selectors
+        function initSelectors() {
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
+
+            yearSelect = document.getElementById('year-select');
+            for (let year = 1900; year <= 2030; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+
+            monthSelect = document.getElementById('month-select');
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                if (index === currentMonth) option.selected = true;
+                monthSelect.appendChild(option);
+            });
+
+            daySelect = document.getElementById('day-select');
+            for (let day = 1; day <= 31; day++) {
+                const option = document.createElement('option');
+                option.value = day;
+                option.textContent = day;
+                if (day === selectedDay) option.selected = true;
+                daySelect.appendChild(option);
+            }
+
+            document.getElementById('day-btn').textContent = selectedDay + '日';
+        }
+
+        function renderDayHeaders() {
+            const container = document.getElementById('day-headers');
+            container.innerHTML = daysOfWeek.map((day, index) => `
+                <div class="day-header ${index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}" 
+                     onclick="playDaySound('${day.name}')">
+                    <div class="kanji">${day.kanji}</div>
+                </div>
+            `).join('');
+        }
+
+        function getWeekRange(date) {
+            const day = date.getDay();
+            const diff = date.getDate() - day;
+            const startOfWeek = new Date(date.setDate(diff));
+            const endOfWeek = new Date(date.setDate(diff + 6));
+            return { start: startOfWeek, end: endOfWeek };
+        }
+
+        function renderCalendar() {
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            const selected = parseInt(daySelect.value);
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const today = new Date();
+            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+            let weekStart = null, weekEnd = null;
+            if (showWeek && selected <= daysInMonth) {
+                const selectedDate = new Date(year, month, selected);
+                const weekRange = getWeekRange(selectedDate);
+                weekStart = weekRange.start;
+                weekEnd = weekRange.end;
+            }
+
+            const container = document.getElementById('calendar-grid');
+            let html = '';
+
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
+
+                let classes = 'calendar-day';
+                if (dayOfWeek === 0) classes += ' sunday';
+                if (dayOfWeek === 6) classes += ' saturday';
+                if (isCurrentMonth && day === today.getDate()) classes += ' today';
+                if (day === selected) classes += ' selected';
+                if (showWeek && weekStart && weekEnd && date >= weekStart && date <= weekEnd) {
+                    classes += ' week-highlight';
+                }
+
+                html += `<div class="${classes}" onclick="selectDay(${day})">${day}</div>`;
+            }
+
+            container.innerHTML = html;
+            document.getElementById('month-btn').textContent = `${month + 1} 月`;
+            document.getElementById('year-btn').textContent = year + '年';
+        }
+
+        function selectDay(day) {
+            selectedDay = day;
+            daySelect.value = day;
+            document.getElementById('day-btn').textContent = day + '日';
+            playDayReading(day);
+            renderCalendar();
+        }
+
+        function toggleWeek() {
+            showWeek = !showWeek;
+            document.getElementById('week-btn').classList.toggle('active', showWeek);
+            renderCalendar();
+        }
+
+        function speakJapanese(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ja-JP';
+                utterance.rate = 0.8;
+                if (selectedVoice) utterance.voice = selectedVoice;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playDaySound(dayName) {
+            const sounds = {
+                'Sunday': '日曜日', 'Monday': '月曜日', 'Tuesday': '火曜日',
+                'Wednesday': '水曜日', 'Thursday': '木曜日', 'Friday': '金曜日', 'Saturday': '土曜日'
+            };
+            speakJapanese(sounds[dayName]);
+        }
+
+        function playMonthSound() {
+            speakJapanese(monthsJapanese[parseInt(monthSelect.value)]);
+        }
+
+        function playDayReading(day) {
+            if (daysReadings[day]) speakJapanese(daysReadings[day]);
+        }
+
+        function initVoices() {
+            const voiceSelect = document.getElementById('voice-select');
+            const voices = speechSynthesis.getVoices();
+            const jpVoices = voices.filter(v => v.lang.includes('ja'));
+
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = 'Default';
+            voiceSelect.appendChild(defaultOpt);
+
+            jpVoices.forEach(voice => {
+                const opt = document.createElement('option');
+                opt.value = voice.name;
+                opt.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(opt);
+            });
+
+            voiceSelect.addEventListener('change', () => {
+                selectedVoice = voices.find(v => v.name === voiceSelect.value) || null;
+            });
+        }
+
+        function getYearReading(year) {
+            const thousands = Math.floor(year / 1000);
+            const hundreds = Math.floor((year % 1000) / 100);
+            const tens = Math.floor((year % 100) / 10);
+            const ones = year % 10;
+
+            let reading = '';
+
+            if (thousands === 1) reading += 'せん';
+            else if (thousands > 1) reading += ['','いち','に','さん','よ','ご','ろく','なな','はち','きゅう'][thousands] + 'せん';
+
+            if (hundreds > 0) {
+                reading += ['','ひゃく','にひゃく','さんびゃく','よんひゃく','ごひゃく','ろっぴゃく','ななひゃく','はっぴゃく','きゅうひゃく'][hundreds];
+            }
+
+            if (tens > 0) {
+                reading += ['','じゅう','にじゅう','さんじゅう','よんじゅう','ごじゅう','ろくじゅう','ななじゅう','はちじゅう','きゅうじゅう'][tens];
+            }
+
+            if (ones > 0) {
+                reading += ['','いち','に','さん','よ','ご','ろく','なな','はち','きゅう'][ones];
+            }
+
+            return reading + 'ねん';
+        }
+
+        function playYearSound() {
+            speakJapanese(getYearReading(parseInt(yearSelect.value)));
+        }
+
+        function playFullDate() {
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value) + 1;
+            const day = parseInt(daySelect.value);
+            speakJapanese(getYearReading(year) + ' ' + monthsJapanese[month - 1] + daysReadings[day]);
+        }
+
+        function playDaySoundSelected() {
+            playDayReading(parseInt(daySelect.value));
+        }
+
+        // Event listeners
+        function initEventListeners() {
+            yearSelect.addEventListener('change', () => {
+                document.getElementById('year-btn').textContent = yearSelect.value + '年';
+                renderCalendar();
+            });
+
+            monthSelect.addEventListener('change', () => {
+                const year = parseInt(yearSelect.value);
+                const month = parseInt(monthSelect.value);
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                if (selectedDay > daysInMonth) {
+                    selectedDay = daysInMonth;
+                    daySelect.value = selectedDay;
+                }
+                renderCalendar();
+            });
+
+            daySelect.addEventListener('change', () => {
+                selectedDay = parseInt(daySelect.value);
+                renderCalendar();
+            });
+
+            speechSynthesis.onvoiceschanged = initVoices;
+        }
+
+        // Initialize
+        initSelectors();
+        renderDayHeaders();
+        renderCalendar();
+        initEventListeners();
+    </script>
+</body>
+</html>
