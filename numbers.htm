@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0074)https://confer.to/attachment-download/28d5e9fb-ab4c-48e3-a01e-059981d33f34 -->
+<!-- saved from url=(0074)https://confer.to/attachment-download/399ffb5e-2199-4e59-8491-a520bae4b231 -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,6 +30,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            touch-action: manipulation;
         }
 
         .container {
@@ -101,6 +102,9 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .count-btn::before {
@@ -154,6 +158,7 @@
             font-size: 16px;
             color: var(--aizome-dark);
             font-weight: 600;
+            user-select: none;
         }
 
         .toggle-switch {
@@ -165,6 +170,9 @@
             position: relative;
             transition: background 0.3s ease;
             border: 2px solid var(--aizome-light);
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .toggle-switch.positive {
@@ -190,6 +198,7 @@
             font-size: 14px;
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            pointer-events: none;
         }
 
         .toggle-switch.positive .toggle-knob {
@@ -209,6 +218,7 @@
             color: white;
             top: 50%;
             transform: translateY(-50%);
+            pointer-events: none;
         }
 
         .toggle-sign.plus {
@@ -239,6 +249,8 @@
             margin-bottom: 20px;
             cursor: default;
             letter-spacing: 2px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .action-buttons {
@@ -257,6 +269,9 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .action-btn::before {
