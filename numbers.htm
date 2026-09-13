@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<!-- saved from url=(0074)https://confer.to/attachment-download/28d5e9fb-ab4c-48e3-a01e-059981d33f34 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Counting Study</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --aizome-dark: #1e3a5f;
+            --aizome-mid: #2d5a87;
+            --aizome-light: #4a7ba7;
+            --aizome-pale: #7da2c9;
+            --aizome-accent: #5b8db8;
+            --sumi-black: #2b2b2b;
+            --washi-cream: #f5f3ed;
+            --beni-red: #c44569;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(25, 50, 80, 0.15);
+            overflow: hidden;
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            padding: 3px;
+            background: linear-gradient(135deg, var(--aizome-dark) 0%, var(--aizome-mid) 50%, var(--aizome-dark) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--aizome-dark) 0%, var(--aizome-mid) 50%, var(--aizome-dark) 100%);
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: var(--washi-cream);
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .top-section {
+            margin-bottom: 30px;
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .count-btn {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid var(--aizome-light);
+            border-radius: 10px;
+            background: white;
+            color: var(--aizome-dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .count-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--aizome-pale), var(--aizome-light));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .count-btn span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .count-btn:hover {
+            background: linear-gradient(135deg, var(--aizome-light), var(--aizome-mid));
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(74, 123, 167, 0.4);
+        }
+
+        .count-btn:active {
+            transform: translateY(0);
+        }
+
+        .count-btn.adding {
+            background: linear-gradient(135deg, var(--aizome-mid), var(--aizome-dark));
+            color: white;
+        }
+
+        .count-btn.subtracting {
+            background: linear-gradient(135deg, var(--beni-red), #a33555);
+            color: white;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-label {
+            font-size: 16px;
+            color: var(--aizome-dark);
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            width: 80px;
+            height: 40px;
+            background: var(--aizome-pale);
+            border-radius: 20px;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s ease;
+            border: 2px solid var(--aizome-light);
+        }
+
+        .toggle-switch.positive {
+            background: linear-gradient(135deg, var(--aizome-light), var(--aizome-mid));
+        }
+
+        .toggle-switch.negative {
+            background: linear-gradient(135deg, var(--beni-red), #a33555);
+        }
+
+        .toggle-knob {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.positive .toggle-knob {
+            transform: translateX(0);
+            color: var(--aizome-mid);
+        }
+
+        .toggle-switch.negative .toggle-knob {
+            transform: translateX(40px);
+            color: var(--beni-red);
+        }
+
+        .toggle-sign {
+            position: absolute;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .toggle-sign.plus {
+            left: 12px;
+        }
+
+        .toggle-sign.minus {
+            right: 12px;
+        }
+
+        .bottom-section {
+            background: linear-gradient(180deg, #e8ecf1 0%, #d4dce4 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid var(--aizome-pale);
+        }
+
+        .display-field {
+            width: 100%;
+            padding: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            border: 3px solid var(--aizome-light);
+            border-radius: 12px;
+            background: white;
+            color: var(--aizome-dark);
+            margin-bottom: 20px;
+            cursor: default;
+            letter-spacing: 2px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .action-btn {
+            padding: 15px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid var(--aizome-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--aizome-dark), var(--aizome-accent), var(--aizome-dark));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .action-btn span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .action-btn.yomidashi {
+            background: linear-gradient(135deg, var(--aizome-mid), var(--aizome-dark));
+            color: white;
+        }
+
+        .action-btn.yomidashi:hover {
+            background: linear-gradient(135deg, var(--aizome-light), var(--aizome-mid));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(30, 58, 95, 0.4);
+        }
+
+        .action-btn.clear {
+            background: white;
+            color: var(--aizome-dark);
+        }
+
+        .action-btn.clear:hover {
+            background: linear-gradient(135deg, var(--beni-red), #a33555);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(196, 69, 105, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .button-row {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+            }
+
+            .count-btn {
+                font-size: 14px;
+                aspect-ratio: auto;
+                padding: 15px 10px;
+            }
+
+            .display-field {
+                font-size: 24px;
+                padding: 15px;
+            }
+
+            .action-btn {
+                padding: 12px 25px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Japanese Counting Study</h1>
+        </div>
+
+        <div class="content">
+            <div class="top-section">
+                <div class="button-row">
+                    <button class="count-btn adding" data-value="100000000"><span>億</span></button>
+                    <button class="count-btn adding" data-value="10000000"><span>千万</span></button>
+                    <button class="count-btn adding" data-value="1000000"><span>百万</span></button>
+                    <button class="count-btn adding" data-value="100000"><span>十万</span></button>
+                    <button class="count-btn adding" data-value="10000"><span>万</span></button>
+                    <button class="count-btn adding" data-value="1000"><span>千</span></button>
+                    <button class="count-btn adding" data-value="100"><span>百</span></button>
+                    <button class="count-btn adding" data-value="10"><span>十</span></button>
+                    <button class="count-btn adding" data-value="1"><span>一</span></button>
+                </div>
+
+                <div class="toggle-container">
+                    <span class="toggle-label">Mode:</span>
+                    <div class="toggle-switch positive" id="toggle-switch" onclick="toggleMode()">
+                        <span class="toggle-sign plus">+</span>
+                        <span class="toggle-sign minus">−</span>
+                        <div class="toggle-knob" id="toggle-knob">+</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-section">
+                <input type="text" class="display-field" id="display-field" value="0" readonly="">
+                <div class="action-buttons">
+                    <button class="action-btn yomidashi" onclick="playReading()"><span>読み出し</span></button>
+                    <button class="action-btn clear" onclick="clearValue()"><span>クリア</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentValue = 0;
+        let isPositive = true;
+        const maxValue = 999999999;
+        const minValue = 0;
+
+        const numberKanji = {
+            0: '零',
+            1: '一',
+            2: '二',
+            3: '三',
+            4: '四',
+            5: '五',
+            6: '六',
+            7: '七',
+            8: '八',
+            9: '九'
+        };
+
+        document.querySelectorAll('.count-btn').forEach(btn => {
+            btn.addEventListener('click', () => handleCount(btn));
+        });
+
+        function handleCount(btn) {
+            const value = parseInt(btn.dataset.value);
+            
+            if (isPositive) {
+                currentValue = Math.min(currentValue + value, maxValue);
+            } else {
+                currentValue = Math.max(currentValue - value, minValue);
+            }
+            
+            updateDisplay();
+            updateButtonStyles();
+        }
+
+        function toggleMode() {
+            isPositive = !isPositive;
+            const toggle = document.getElementById('toggle-switch');
+            const knob = document.getElementById('toggle-knob');
+            
+            if (isPositive) {
+                toggle.classList.remove('negative');
+                toggle.classList.add('positive');
+                knob.textContent = '+';
+            } else {
+                toggle.classList.remove('positive');
+                toggle.classList.add('negative');
+                knob.textContent = '−';
+            }
+            
+            updateButtonStyles();
+        }
+
+        function updateButtonStyles() {
+            document.querySelectorAll('.count-btn').forEach(btn => {
+                btn.classList.remove('adding', 'subtracting');
+                if (isPositive) {
+                    btn.classList.add('adding');
+                } else {
+                    btn.classList.add('subtracting');
+                }
+            });
+        }
+
+        function updateDisplay() {
+            document.getElementById('display-field').value = currentValue.toLocaleString('en-US');
+        }
+
+        function clearValue() {
+            currentValue = 0;
+            updateDisplay();
+        }
+
+        function getSmallNumberKanji(num) {
+            if (num === 0) return '';
+            if (num === 1) return '一';
+            if (num === 100) return '百';
+            if (num === 1000) return '千';
+            if (num < 100) {
+                const tens = Math.floor(num / 10);
+                const ones = num % 10;
+                let kanji = '';
+                if (tens > 0) {
+                    if (tens === 1) {
+                        kanji += '十';
+                    } else {
+                        kanji += numberKanji[tens] + '十';
+                    }
+                }
+                if (ones > 0) {
+                    kanji += numberKanji[ones];
+                }
+                return kanji;
+            }
+            if (num < 1000) {
+                const hundreds = Math.floor(num / 100);
+                const remainder = num % 100;
+                let kanji = '';
+                if (hundreds === 1) {
+                    kanji += '百';
+                } else {
+                    kanji += numberKanji[hundreds] + '百';
+                }
+                if (remainder > 0) {
+                    kanji += getSmallNumberKanji(remainder);
+                }
+                return kanji;
+            }
+            const thousands = Math.floor(num / 1000);
+            const remainder = num % 1000;
+            let kanji = '';
+            if (thousands === 1) {
+                kanji += '千';
+            } else {
+                kanji += numberKanji[thousands] + '千';
+            }
+            if (remainder > 0) {
+                kanji += getSmallNumberKanji(remainder);
+            }
+            return kanji;
+        }
+
+        function getJapaneseKanji(num) {
+            if (num === 0) return '零';
+            
+            let kanji = '';
+            
+            if (num >= 100000000) {
+                const oku = Math.floor(num / 100000000);
+                const remainder = num % 100000000;
+                kanji += getSmallNumberKanji(oku) + '億';
+                num = remainder;
+            }
+            
+            if (num >= 10000) {
+                const man = Math.floor(num / 10000);
+                const remainder = num % 10000;
+                kanji += getSmallNumberKanji(man) + '万';
+                num = remainder;
+            }
+            
+            if (num >= 1000) {
+                const sen = Math.floor(num / 1000);
+                const remainder = num % 1000;
+                if (sen === 1) {
+                    kanji += '千';
+                } else {
+                    kanji += getSmallNumberKanji(sen) + '千';
+                }
+                num = remainder;
+            }
+            
+            if (num >= 100) {
+                const hyaku = Math.floor(num / 100);
+                const remainder = num % 100;
+                if (hyaku === 1) {
+                    kanji += '百';
+                } else {
+                    kanji += getSmallNumberKanji(hyaku) + '百';
+                }
+                num = remainder;
+            }
+            
+            if (num >= 10) {
+                const ju = Math.floor(num / 10);
+                const remainder = num % 10;
+                if (ju === 1) {
+                    kanji += '十';
+                } else {
+                    kanji += numberKanji[ju] + '十';
+                }
+                num = remainder;
+            }
+            
+            if (num > 0) {
+                kanji += numberKanji[num];
+            }
+            
+            return kanji;
+        }
+
+        function playReading() {
+            if ('speechSynthesis' in window) {
+                const kanji = getJapaneseKanji(currentValue);
+                const utterance = new SpeechSynthesisUtterance(kanji);
+                utterance.lang = 'ja-JP';
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        updateButtonStyles();
+    </script>
+
+
+</body></html>
