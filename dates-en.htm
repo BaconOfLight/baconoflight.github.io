@@ -34,7 +34,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
@@ -47,6 +47,14 @@
             color: #333;
             cursor: pointer;
             font-weight: 600;
+        }
+
+        .kanji-label {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            min-width: 30px;
+            text-align: center;
         }
 
         .top-bar button {
@@ -121,17 +129,14 @@
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-weight: 600;
+            font-size: 16px;
         }
 
         .day-header:hover {
             background: #667eea;
             color: white;
             transform: translateY(-2px);
-        }
-
-        .day-header.kanji {
-            font-size: 28px;
-            font-weight: bold;
         }
 
         .day-header.sunday {
@@ -246,13 +251,17 @@
 		@media (max-width: 600px) {
 			.top-bar {
 				padding: 15px;
-				gap: 10px;
+				gap: 5px;
 			}
 
 			.top-bar select {
 				padding: 8px 12px;
 				font-size: 14px;
 			}
+
+            .kanji-label {
+                font-size: 20px;
+            }
 
 			.action-row {
 				gap: 8px;
@@ -268,8 +277,8 @@
 				padding: 15px;
 			}
 
-			.day-header.kanji {
-				font-size: 20px;
+			.day-header {
+				font-size: 14px;
 			}
 
 			.calendar-day {
@@ -291,23 +300,23 @@
     <div class="container">
         <div class="top-bar">
             <select id="year-select"></select>
+            <span class="kanji-label">年</span>
             <select id="month-select"></select>
+            <span class="kanji-label">月</span>
             <select id="day-select"></select>
+            <span class="kanji-label">日</span>
         </div>
 
         <div class="calendar">
             <div class="action-row">
-			    <button class="action-btn" id="year-btn" onclick="playYearSound()">2026</button>
                 <button class="action-btn" id="month-btn" onclick="playMonthSound()">January</button>
 				<button class="action-btn" id="day-btn" onclick="playDaySoundSelected()">15th</button>
+				<button class="action-btn" id="year-btn" onclick="playYearSound()">2026</button>
 				<button class="action-btn" id="date-btn" onclick="playFullDate()">Full Date</button>
             </div>
 
             <div class="day-headers" id="day-headers"></div>
             <div class="calendar-grid" id="calendar-grid"></div>
-			<div class="action-row">
-				<button class="action-btn" id="week-btn" onclick="toggleWeek()">Week</button>
-			</div>
         </div>
 		<div class="footer">
 			<label>Voice: <select id="voice-select"></select></label>
@@ -315,19 +324,19 @@
     </div>
 
     <script>
-        const daysOfWeek = [
-            { kanji: '日', name: 'Sunday' },
-            { kanji: '月', name: 'Monday' },
-            { kanji: '火', name: 'Tuesday' },
-            { kanji: '水', name: 'Wednesday' },
-            { kanji: '木', name: 'Thursday' },
-            { kanji: '金', name: 'Friday' },
-            { kanji: '土', name: 'Saturday' }
-        ];
-
         const months = [
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        const daysOfWeek = [
+            { abbr: 'Sun', name: 'Sunday' },
+            { abbr: 'Mon', name: 'Monday' },
+            { abbr: 'Tue', name: 'Tuesday' },
+            { abbr: 'Wed', name: 'Wednesday' },
+            { abbr: 'Thu', name: 'Thursday' },
+            { abbr: 'Fri', name: 'Friday' },
+            { abbr: 'Sat', name: 'Saturday' }
         ];
 
         // English ordinal suffixes for days
@@ -357,16 +366,16 @@
             yearSelect.appendChild(option);
         }
 
-        // Initialize month selector
+        // Initialize month selector (numbers 1-12)
         const monthSelect = document.getElementById('month-select');
         const currentMonth = new Date().getMonth();
-        months.forEach((month, index) => {
+        for (let i = 0; i < 12; i++) {
             const option = document.createElement('option');
-            option.value = index;
-            option.textContent = month;
-            if (index === currentMonth) option.selected = true;
+            option.value = i;
+            option.textContent = i + 1;
+            if (i === currentMonth) option.selected = true;
             monthSelect.appendChild(option);
-        });
+        }
 
         // Initialize day selector
         const daySelect = document.getElementById('day-select');
@@ -380,13 +389,13 @@
 
 		document.getElementById('day-btn').textContent = getOrdinal(selectedDay);
 
-        // Render day headers
+        // Render day headers with 3-letter English abbreviations
         function renderDayHeaders() {
             const container = document.getElementById('day-headers');
             container.innerHTML = daysOfWeek.map((day, index) => `
                 <div class="day-header ${index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}" 
                      onclick="playDaySound('${day.name}')">
-                    <div class="kanji">${day.kanji}</div>
+                    ${day.abbr}
                 </div>
             `).join('');
         }
@@ -486,9 +495,21 @@
 			speakEnglish(getDayWord(day));
 		}
 
+        // Workaround for years 2010-2019 to sound as "twenty-ten" etc.
+        function getYearSpeech(year) {
+            if (year >= 2010 && year <= 2019) {
+                const lastTwo = year - 2000;
+                const tens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+                if (lastTwo >= 10 && lastTwo <= 19) {
+                    return 'twenty ' + tens[lastTwo - 10];
+                }
+            }
+            return year.toString();
+        }
+
         function playYearSound() {
             const year = parseInt(yearSelect.value);
-            speakEnglish(year.toString());
+            speakEnglish(getYearSpeech(year));
         }
 
         function playFullDate() {
@@ -496,7 +517,7 @@
             const month = parseInt(monthSelect.value);
             const day = parseInt(daySelect.value);
             
-            const reading = months[month] + ' ' + getOrdinal(day) + ', ' + year;
+            const reading = months[month] + ' ' + day + ', ' + year;
             speakEnglish(reading);
         }
 
@@ -536,7 +557,7 @@
 			});
 		}
 		
-		//eturns the spoken word for each day
+		// Returns the spoken word for each day
 		function getDayWord(n) {
 			const words = {
 				1: 'first', 2: 'second', 3: 'third', 4: 'fourth', 5: 'fifth',
