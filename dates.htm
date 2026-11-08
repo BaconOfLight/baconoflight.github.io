@@ -3,62 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Japanese Calendar Study - DEBUG MODE</title>
+    <title>Japanese Calendar Study</title>
     <link rel="stylesheet" href="dates.css">
-    <style>
-        #debug-panel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #1a1a1a;
-            color: #0f0;
-            font-family: monospace;
-            font-size: 12px;
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            border-top: 2px solid #0f0;
-            z-index: 9999;
-        }
-        #debug-panel h3 {
-            margin: 0 0 10px 0;
-            color: #fff;
-        }
-        .log-entry {
-            margin: 2px 0;
-            padding: 2px;
-        }
-        .log-error { color: #f66; }
-        .log-warn { color: #ff0; }
-        .log-success { color: #6f6; }
-        .log-info { color: #6ff; }
-        #test-buttons {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 9999;
-            background: rgba(0,0,0,0.8);
-            padding: 10px;
-            border-radius: 8px;
-        }
-        #test-buttons button {
-            display: block;
-            margin: 5px 0;
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-    </style>
 </head>
 <body>
-    <div id="test-buttons">
-        <h4 style="color:#fff;margin:0 0 10px 0;">TTS Tests</h4>
-        <button onclick="testEnglish()">Test English</button>
-        <button onclick="testJapanese()">Test Japanese</button>
-        <button onclick="testVoices()">List Voices</button>
-        <button onclick="clearLog()">Clear Log</button>
-    </div>
-
     <div class="container">
         <div class="top-bar">
             <select id="year-select"></select>
@@ -83,31 +31,11 @@
 
         <div class="footer">
             <label>Voice: <select id="voice-select"></select></label>
+            <p class="hint">⚠️ If you hear no sound, check that your device is not on silent/vibrate mode</p>
         </div>
     </div>
 
-    <div id="debug-panel">
-        <h3>🔍 Debug Log</h3>
-        <div id="log-content"></div>
-    </div>
-
     <script>
-        // Debug logging
-        function log(message, type = 'info') {
-            const logContent = document.getElementById('log-content');
-            const entry = document.createElement('div');
-            entry.className = `log-entry log-${type}`;
-            const timestamp = new Date().toLocaleTimeString();
-            entry.textContent = `[${timestamp}] ${message}`;
-            logContent.insertBefore(entry, logContent.firstChild);
-            console.log(`[TTS DEBUG ${type.toUpperCase()}] ${message}`);
-        }
-
-        function clearLog() {
-            document.getElementById('log-content').innerHTML = '';
-            log('Log cleared', 'info');
-        }
-
         const daysOfWeek = [
             { kanji: '日', name: 'Sunday' },
             { kanji: '月', name: 'Monday' },
@@ -142,7 +70,6 @@
             return text.replace(/</g, '\uff1c').replace(/>/g, '\uff1e');
         }
 
-        // Initialize selectors
         function initSelectors() {
             const currentYear = new Date().getFullYear();
             const currentMonth = new Date().getMonth();
@@ -256,74 +183,40 @@
             renderCalendar();
         }
 
-        function speakJapanese(text, label = 'unknown') {
-            log(`speakJapanese called: "${text}" (${label})`, 'info');
-            
-            // Check API availability
+        function speakJapanese(text) {
             if (!('speechSynthesis' in window)) {
-                log('❌ speechSynthesis API NOT available', 'error');
-                alert('Speech Synthesis API is not available in this browser');
                 return;
             }
-            
-            log('✓ speechSynthesis API is available', 'success');
 
-            // Sanitize text
             const sanitizedText = sanitizeText(text);
-            log(`Sanitized text: "${sanitizedText}"`, 'info');
             
-            if (!sanitizedText.trim()) {
-                log('⚠ Empty text after sanitization', 'warn');
-                return;
-            }
-
-            // Check if speaking is possible
-            log(`speechSynthesis.speaking: ${speechSynthesis.speaking}`, 'info');
-            log(`speechSynthesis.pending: ${speechSynthesis.pending}`, 'info');
+            if (!sanitizedText.trim()) return;
 
             try {
-                // Cancel any ongoing speech
-                log('Calling speechSynthesis.cancel()...', 'info');
                 speechSynthesis.cancel();
                 
                 setTimeout(() => {
                     try {
                         const utterance = new SpeechSynthesisUtterance(sanitizedText);
-                        log(`Created utterance for: "${sanitizedText}"`, 'success');
-                        
                         utterance.lang = 'ja-JP';
                         utterance.rate = 0.8;
                         utterance.pitch = 1.0;
                         
-                        log(`Selected voice: ${selectedVoice ? selectedVoice.name : 'Default'}`, 'info');
                         if (selectedVoice) {
                             utterance.voice = selectedVoice;
                         }
 
                         utterance.onerror = (event) => {
-                            log(`❌ Utterance error: ${event.error}`, 'error');
-                            log(`Error details: ${JSON.stringify(event)}`, 'error');
+                            console.warn('Speech synthesis error:', event.error);
                         };
 
-                        utterance.onend = () => {
-                            log(`✓ Utterance completed successfully`, 'success');
-                        };
-                        
-                        utterance.onstart = () => {
-                            log(`✓ Utterance started playing`, 'success');
-                        };
-
-                        log('Calling speechSynthesis.speak()...', 'info');
                         speechSynthesis.speak(utterance);
-                        log(`✓ speak() called, pending: ${speechSynthesis.pending}`, 'success');
-                        
                     } catch (e) {
-                        log(`❌ Failed to create/speak utterance: ${e.message}`, 'error');
-                        log(`Stack: ${e.stack}`, 'error');
+                        console.error('Failed to create utterance:', e);
                     }
                 }, 10);
             } catch (e) {
-                log(`❌ Speech synthesis failed: ${e.message}`, 'error');
+                console.error('Speech synthesis failed:', e);
             }
         }
 
@@ -332,37 +225,22 @@
                 'Sunday': '日曜日', 'Monday': '月曜日', 'Tuesday': '火曜日',
                 'Wednesday': '水曜日', 'Thursday': '木曜日', 'Friday': '金曜日', 'Saturday': '土曜日'
             };
-            speakJapanese(sounds[dayName], `day-${dayName}`);
+            speakJapanese(sounds[dayName]);
         }
 
         function playMonthSound() {
-            speakJapanese(monthsJapanese[parseInt(monthSelect.value)], 'month');
+            speakJapanese(monthsJapanese[parseInt(monthSelect.value)]);
         }
 
         function playDayReading(day) {
-            if (daysReadings[day]) {
-                speakJapanese(daysReadings[day], `day-reading-${day}`);
-            } else {
-                log(`No reading for day ${day}`, 'warn');
-            }
+            if (daysReadings[day]) speakJapanese(daysReadings[day]);
         }
 
         function initVoices() {
-            if (voicesLoaded) {
-                log('Voices already loaded, skipping', 'info');
-                return;
-            }
-            
-            log('initVoices() called', 'info');
+            if (voicesLoaded) return;
             
             const voiceSelect = document.getElementById('voice-select');
             const voices = speechSynthesis.getVoices();
-            
-            log(`getVoices() returned ${voices.length} voices`, 'info');
-            
-            if (voices.length === 0) {
-                log('⚠ No voices returned yet - may need to wait', 'warn');
-            }
             
             voiceSelect.innerHTML = '';
             
@@ -371,13 +249,7 @@
             defaultOpt.textContent = 'Default';
             voiceSelect.appendChild(defaultOpt);
 
-            const jpVoices = voices.filter(v => {
-                const isJP = v.lang.includes('ja');
-                log(`Voice: "${v.name}" lang="${v.lang}" ${isJP ? '✓ JP' : ''}`, isJP ? 'success' : 'info');
-                return isJP;
-            });
-            
-            log(`Found ${jpVoices.length} Japanese voices`, 'success');
+            const jpVoices = voices.filter(v => v.lang.includes('ja'));
             
             jpVoices.forEach(voice => {
                 const opt = document.createElement('option');
@@ -388,11 +260,9 @@
 
             voiceSelect.addEventListener('change', () => {
                 selectedVoice = voices.find(v => v.name === voiceSelect.value) || null;
-                log(`Voice changed to: ${selectedVoice ? selectedVoice.name : 'Default'}`, 'info');
             });
 
             voicesLoaded = true;
-            log('Voice initialization complete', 'success');
         }
 
         function getYearReading(year) {
@@ -422,48 +292,18 @@
         }
 
         function playYearSound() {
-            speakJapanese(getYearReading(parseInt(yearSelect.value)), 'year');
+            speakJapanese(getYearReading(parseInt(yearSelect.value)));
         }
 
         function playFullDate() {
             const year = parseInt(yearSelect.value);
             const month = parseInt(monthSelect.value) + 1;
             const day = parseInt(daySelect.value);
-            speakJapanese(getYearReading(year) + ' ' + monthsJapanese[month - 1] + daysReadings[day], 'full-date');
+            speakJapanese(getYearReading(year) + ' ' + monthsJapanese[month - 1] + daysReadings[day]);
         }
 
         function playDaySoundSelected() {
             playDayReading(parseInt(daySelect.value));
-        }
-
-        // Test functions
-        function testEnglish() {
-            log('=== ENGLISH TEST ===', 'info');
-            if (!('speechSynthesis' in window)) {
-                log('❌ speechSynthesis not available', 'error');
-                return;
-            }
-            
-            const utterance = new SpeechSynthesisUtterance('Hello, this is a test');
-            utterance.lang = 'en-US';
-            utterance.onerror = (e) => log(`English test error: ${e.error}`, 'error');
-            utterance.onend = () => log('English test completed', 'success');
-            speechSynthesis.speak(utterance);
-            log('English test initiated', 'info');
-        }
-
-        function testJapanese() {
-            log('=== JAPANESE TEST ===', 'info');
-            speakJapanese('こんにちは', 'manual-test');
-        }
-
-        function testVoices() {
-            log('=== VOICE LIST TEST ===', 'info');
-            const voices = speechSynthesis.getVoices();
-            log(`Total voices: ${voices.length}`, 'info');
-            voices.forEach((v, i) => {
-                log(`[${i}] ${v.name} - ${v.lang} - ${v.default ? 'DEFAULT' : ''}`, 'info');
-            });
         }
 
         function initEventListeners() {
@@ -489,27 +329,16 @@
             });
 
             if (speechSynthesis.onvoiceschanged !== undefined) {
-                speechSynthesis.onvoiceschanged = () => {
-                    log('voiceschanged event fired', 'info');
-                    initVoices();
-                };
-            } else {
-                log('voiceschanged event not supported', 'warn');
+                speechSynthesis.onvoiceschanged = initVoices;
             }
             
-            setTimeout(() => {
-                log('Initial voice load attempt...', 'info');
-                initVoices();
-            }, 100);
+            setTimeout(initVoices, 100);
         }
 
-        // Initialize
-        log('Page loaded, starting initialization...', 'info');
         initSelectors();
         renderDayHeaders();
         renderCalendar();
         initEventListeners();
-        log('Initialization complete', 'success');
     </script>
 </body>
 </html>
