@@ -63,6 +63,7 @@
         let showWeek = false;
         let selectedVoice = null;
         let voicesLoaded = false;
+        let isSpeaking = false;
         let yearSelect, monthSelect, daySelect;
 
         function sanitizeText(text) {
@@ -173,8 +174,8 @@
             selectedDay = day;
             daySelect.value = day;
             document.getElementById('day-btn').textContent = day + '日';
-            playDayReading(day);
             renderCalendar();
+            playDayReading(day);
         }
 
         function toggleWeek() {
@@ -184,38 +185,42 @@
         }
 
         function speakJapanese(text) {
-            if (!('speechSynthesis' in window)) {
-                return;
-            }
+            if (!('speechSynthesis' in window')) return;
 
             const sanitizedText = sanitizeText(text);
-            
             if (!sanitizedText.trim()) return;
 
-            try {
+            // Only cancel if already speaking (prevents queue buildup)
+            if (isSpeaking) {
                 speechSynthesis.cancel();
+            }
+
+            try {
+                const utterance = new SpeechSynthesisUtterance(sanitizedText);
+                utterance.lang = 'ja-JP';
+                utterance.rate = 0.8;
+                utterance.pitch = 1.0;
                 
-                setTimeout(() => {
-                    try {
-                        const utterance = new SpeechSynthesisUtterance(sanitizedText);
-                        utterance.lang = 'ja-JP';
-                        utterance.rate = 0.8;
-                        utterance.pitch = 1.0;
-                        
-                        if (selectedVoice) {
-                            utterance.voice = selectedVoice;
-                        }
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
 
-                        utterance.onerror = (event) => {
-                            console.warn('Speech synthesis error:', event.error);
-                        };
+                utterance.onstart = () => {
+                    isSpeaking = true;
+                };
 
-                        speechSynthesis.speak(utterance);
-                    } catch (e) {
-                        console.error('Failed to create utterance:', e);
-                    }
-                }, 10);
+                utterance.onend = () => {
+                    isSpeaking = false;
+                };
+
+                utterance.onerror = (event) => {
+                    isSpeaking = false;
+                    console.warn('Speech synthesis error:', event.error);
+                };
+
+                speechSynthesis.speak(utterance);
             } catch (e) {
+                isSpeaking = false;
                 console.error('Speech synthesis failed:', e);
             }
         }
@@ -332,7 +337,8 @@
                 speechSynthesis.onvoiceschanged = initVoices;
             }
             
-            setTimeout(initVoices, 100);
+            // Load voices immediately
+            initVoices();
         }
 
         initSelectors();
