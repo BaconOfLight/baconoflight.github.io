@@ -61,7 +61,16 @@
         let selectedDay = new Date().getDate();
         let showWeek = false;
         let selectedVoice = null;
-		let yearSelect, monthSelect, daySelect;
+        let voicesLoaded = false;
+        let yearSelect, monthSelect, daySelect;
+
+        // Sanitize text to prevent iOS speech synthesis freeze
+        // iOS 26+ has a bug where < and > characters can break speechSynthesis
+        function sanitizeText(text) {
+            if (typeof text !== 'string') return '';
+            // Replace < and > with fullwidth equivalents that don't trigger the bug
+            return text.replace(/</g, '\uff1c').replace(/>/g, '\uff1e');
+        }
 
         // Initialize selectors
         function initSelectors() {
@@ -178,12 +187,48 @@
         }
 
         function speakJapanese(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ja-JP';
-                utterance.rate = 0.8;
-                if (selectedVoice) utterance.voice = selectedVoice;
-                speechSynthesis.speak(utterance);
+            if (!('speechSynthesis' in window)) {
+                console.warn('Speech Synthesis not supported');
+                return;
+            }
+
+            // Sanitize text to prevent iOS freeze bug
+            const sanitizedText = sanitizeText(text);
+            
+            if (!sanitizedText.trim()) return;
+
+            try {
+                // Cancel any ongoing speech to prevent queue issues on iOS
+                speechSynthesis.cancel();
+                
+                // Small delay to ensure cancel completes (iOS bug workaround)
+                setTimeout(() => {
+                    try {
+                        const utterance = new SpeechSynthesisUtterance(sanitizedText);
+                        utterance.lang = 'ja-JP';
+                        utterance.rate = 0.8;
+                        utterance.pitch = 1.0;
+                        
+                        if (selectedVoice) {
+                            utterance.voice = selectedVoice;
+                        }
+
+                        // Error handling for speech synthesis
+                        utterance.onerror = (event) => {
+                            console.warn('Speech synthesis error:', event.error);
+                        };
+
+                        utterance.onend = () => {
+                            // Speech completed successfully
+                        };
+
+                        speechSynthesis.speak(utterance);
+                    } catch (e) {
+                        console.error('Failed to create utterance:', e);
+                    }
+                }, 10);
+            } catch (e) {
+                console.error('Speech synthesis failed:', e);
             }
         }
 
@@ -204,15 +249,21 @@
         }
 
         function initVoices() {
+            if (voicesLoaded) return;
+            
             const voiceSelect = document.getElementById('voice-select');
             const voices = speechSynthesis.getVoices();
-            const jpVoices = voices.filter(v => v.lang.includes('ja'));
-
+            
+            // Clear existing options except the default
+            voiceSelect.innerHTML = '';
+            
             const defaultOpt = document.createElement('option');
             defaultOpt.value = '';
             defaultOpt.textContent = 'Default';
             voiceSelect.appendChild(defaultOpt);
 
+            const jpVoices = voices.filter(v => v.lang.includes('ja'));
+            
             jpVoices.forEach(voice => {
                 const opt = document.createElement('option');
                 opt.value = voice.name;
@@ -223,6 +274,8 @@
             voiceSelect.addEventListener('change', () => {
                 selectedVoice = voices.find(v => v.name === voiceSelect.value) || null;
             });
+
+            voicesLoaded = true;
         }
 
         function getYearReading(year) {
@@ -289,7 +342,13 @@
                 renderCalendar();
             });
 
-            speechSynthesis.onvoiceschanged = initVoices;
+            // Handle voice loading - iOS requires this event
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = initVoices;
+            }
+            
+            // Also try to load voices immediately (some browsers load synchronously)
+            setTimeout(initVoices, 100);
         }
 
         // Initialize
